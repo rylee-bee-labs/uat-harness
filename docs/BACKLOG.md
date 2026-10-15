@@ -13,7 +13,7 @@ first, whatever its size.
 
 - Issue: https://github.com/rylee-bee-labs/uat-harness/issues/5
 - Opened: 2026-10-06 · Labels: none
-- Status on 2026-10-07: closed as not planned on 2026-10-07 — tracked here
+- PARKED until the VEFR mission resumes (owner decision 2026-10-15). Issue to file by coordinator, label parked.
 
 This issue asks for research into whether uat-harness can act as evidence for a domain-owned player
 driver without taking on that domain's game semantics. It came out of a 2026-10-06 design session
