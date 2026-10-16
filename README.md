@@ -8,15 +8,15 @@ and what the accessibility scan says, in plain words.
 
 ## Is it running?
 
-**UNKNOWN.** This README was rewritten without a Node runtime available, so no claim is made either
-way. Check it yourself:
+The harness is an **on-demand CLI, not a resident service**. Whether the
+current checkout passes is **UNKNOWN** until tested on this machine:
 
 ```sh
 npm test
 ```
 
-Anything other than a clean exit means it is not passing right now. A green suite is not a
-substitute for the end-to-end smoke run in [`AGENTS.md`](AGENTS.md).
+A test failure is a local test result, not proof that any separate deployed
+website is down. Passing tests do not replace the real-browser smoke below.
 
 ## How to use it
 
@@ -25,11 +25,11 @@ substitute for the end-to-end smoke run in [`AGENTS.md`](AGENTS.md).
 # that already has @playwright/test, axe-core and adm-zip.
 npm install && npx playwright install chromium
 
-# Serve this repo's own smoke page.
-python3 -m http.server PORT --bind 127.0.0.1 --directory fixtures
+# Terminal A: serve the included synthetic smoke fixture (leave running).
+python3 -m http.server 8765 --bind 127.0.0.1 --directory fixtures
 
-# Drive it.
-python3 uat.py http://127.0.0.1:PORT/sample.html --out runs/smoke
+# Terminal B: drive that same local fixture in a separate shell.
+python3 uat.py http://127.0.0.1:8765/sample.html --out runs/smoke
 ```
 
 That last command clicks, taps and types for real. Read-only mode is on by default: it blocks
