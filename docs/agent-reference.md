@@ -44,11 +44,21 @@ dir). Run it with no arguments to print usage.
 
 **Smoke test (run before claiming it works):**
 
+Install the repo's declared browser dependencies first (`npm install && npx playwright install chromium`),
+then use **two terminals from this repo root** so the fixture server remains live:
+
 ```sh
-python3 -m http.server PORT --bind 127.0.0.1 --directory fixtures
-UAT_NODE_MODULES=<existing node_modules with @playwright/test + axe-core> \
-  python3 uat.py http://127.0.0.1:PORT/sample.html --out <dir under runs/ or outside the repo>
+# Terminal A (leave running)
+python3 -m http.server 8765 --bind 127.0.0.1 --directory fixtures
+
+# Terminal B
+python3 uat.py http://127.0.0.1:8765/sample.html --out runs/smoke
 ```
+
+If dependencies are intentionally supplied from another checkout, set
+`UAT_NODE_MODULES` to its *real existing absolute path*, not a literal
+angle-bracket placeholder. Port 8765 is an example; use an available local port
+consistently in both commands.
 
 Expect exit 0, `findings.json` + `report.md`, undersized targets flagged (`"level": "problem"` in
 `findings.json`, `PROBLEM` in `report.md`), and read-only notes (`would have sent: POST …`).
