@@ -66,3 +66,7 @@ findings; for behaviour changes, open `report.md` (and a screenshot or trace) an
 changed. Update this file and `README.md` if env vars, outputs or commands changed.
 
 Reference detail: docs/agent-reference.md
+
+## Play-Nice pin and verification
+
+Use [the adoption manifest](.project/contracts/adoption.yaml), the [shared floor](https://github.com/rylee-bee-labs/play-nice-contracts/blob/main/contracts/everyone/FLOOR.md) and applicable packs before modifying this repo. [Freshness CI](.github/workflows/contract-freshness.yml) checks revision currentness, not test completeness or owner permission. A `playnice check .` badge may be claimed only after that separate check actually runs against a verified Play-Nice checkout. Existing repo safety, privacy, execution and publish gates remain binding.

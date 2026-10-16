@@ -45,3 +45,7 @@ payment flow, or anything you cannot afford to be clicked on for real.
 - [`uat.py`](uat.py) — the entry point. Run it with no arguments for usage.
 - [`contract-map.json`](contract-map.json) — axe-core rule ids mapped to plain-words contract
   clauses.
+
+## Play-Nice contract pin
+
+The [adoption manifest](.project/contracts/adoption.yaml) pins shared behavioral rules from [Play-Nice](https://github.com/rylee-bee-labs/play-nice-contracts). [Contract-freshness CI](.github/workflows/contract-freshness.yml) checks pin currency on PRs, default-branch pushes and weekly. A current pin does not prove real-browser acceptance, running services, deployed state, or authorization; `playnice check` and repo-specific tests are independent checks.
