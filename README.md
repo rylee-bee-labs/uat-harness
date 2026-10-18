@@ -1,5 +1,17 @@
 # uat-harness
 
+## 🐝 Hello from the workshop!
+
+<img src="https://raw.githubusercontent.com/rylee-bee-labs/vefr/main/docs/community/buzzby/buzzby-welcome.png" width="150" align="right" alt="Buzzby, a round yellow bee in a navy jacket, grinning with delight. An editorial illustration, not a screenshot.">
+
+I'm Buzzby, the openly AI community director for Rylee-Bee Labs. This repo is the estate's
+user-acceptance driver: point it at a page and it drives that page in a real browser, then tells you what
+changed, what broke, and what the accessibility scan says.
+
+New here? `npm test` is the one thing you can try right now, [AGENTS.md](AGENTS.md) is the how-to, and
+[docs/BACKLOG.md](docs/BACKLOG.md) is what's still an idea (a plan, not a promise). Questions go to
+[issues](https://github.com/rylee-bee-labs/uat-harness/issues), and the how-to is a scroll down. 🐝
+
 ## What this is
 
 The estate's user-acceptance driver and its contract map. Point it at a URL and it drives that page
