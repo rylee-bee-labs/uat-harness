@@ -1,8 +1,9 @@
 # Human-shaped UAT — design
 
-**Status:** Proposed (design agreed in conversation 2026-10-28; revised after owner review on PR #42 — isolation
+**Status:** Approved by the owner 2026-10-28 (design agreed in conversation 2026-10-28; revised after owner review on PR #42 — isolation
 boundary, outcome oracle, friction vs defect, coverage labels, privacy, and a smaller Phase 1).
-Not approved for build. Nothing here authorizes spend, merge-gate changes, deploys or weaker safeguards.
+Build starts only once the Phase 1 plan (`docs/superpowers/plans/2026-10-28-journey-phase1.md`) is approved.
+Nothing here authorizes spend, merge-gate changes, deploys or weaker safeguards.
 
 **Supersedes the scope of:** [#41](https://github.com/rylee-bee-labs/uat-harness/issues/41) (newcomer UAT with a
 small local model) and folds in [#13](https://github.com/rylee-bee-labs/uat-harness/issues/13) (domain player
