@@ -19,3 +19,6 @@ CLAUDE.local.md
 # Local env files (UAT_TOKEN is environment-only; this repo is public)
 .env
 .env.*
+
+# Agent run output (Codex last-message files, etc.) -- never commit
+codex-last-message.md
