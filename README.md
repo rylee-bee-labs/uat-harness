@@ -98,9 +98,8 @@ The [adoption manifest](.project/contracts/adoption.yaml) pins shared behavioral
 
 `uat.py` checks a page. A **journey** tries a goal the way a person would: a newcomer starts at the front door,
 uses the keyboard, and the report says in plain words whether it got there, what felt warm, what felt cold, and
-which words it did not know. It runs only against a local copy of a built app with fictional data that the
-harness starts itself, and it is look-only: nothing is answered, sent or cleared (every write is stopped in the
-browser, and each run proves the guard works before it starts).
+which words it did not know. It runs only against a local copy of a built app with fictional data that the harness
+starts itself, and it is look-only: every write is stopped in the browser, and each run proves the guard first.
 
 ```sh
 npm install && npx playwright install chromium

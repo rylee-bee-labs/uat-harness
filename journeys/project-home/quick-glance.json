@@ -16,15 +16,8 @@
     { "id": "find-waiting", "say": "Find the way to what is waiting on me", "cues": ["waiting for you", "waiting on you", "needs you", "need you", "inbox"] },
     { "id": "open-first-item", "say": "Open the first thing waiting on me", "region_cues": ["waiting on you"], "needs_disclosure": true }
   ],
-  "oracle": {
-    "what_needs_me": "{planted.question}",
-    "who_is_waiting": ["{planted.asker}"]
-  },
+  "oracle": { "what_needs_me": "{planted.question}", "who_is_waiting": ["{planted.asker}"] },
   "jargon_file": "jargon.json",
-  "source_hints": {
-    "Hall": "web/src/screens/Hall.tsx",
-    "Inbox": "web/src/screens/Inbox.tsx",
-    "Decision card": "web/src/components/DecisionCard.tsx",
-    "Shell": "web/src/App.tsx"
-  }
+  "source_hints": { "Hall": "web/src/screens/Hall.tsx", "Inbox": "web/src/screens/Inbox.tsx",
+    "Decision card": "web/src/components/DecisionCard.tsx", "Shell": "web/src/App.tsx" }
 }

@@ -60,6 +60,11 @@ Which file to open for which change. Full inventory, commands, env vars, outputs
    `Fetch.requestPaused` session so the allowlist is re-checked at every hop, and an off-allowlist
    hop is failed rather than followed. Chromium-only; await the returned `attachPage(page)` before
    a page's first navigation.
+9. **Journeys run only against a fixture the harness started, and are look-only.** `uat_journey.cjs`
+   serves a built app on `127.0.0.1` with fictional seed data, proves it by nonce, and confines the
+   browser to that origin and to reads (CDP `Fetch`, every hop; self-tested each run). The newcomer
+   never presses anything that could answer, send, clear or withdraw. No flag points a journey at
+   another URL; do not add one.
 
 ## Done means
 
@@ -72,8 +77,3 @@ Reference detail: docs/agent-reference.md
 ## Play-Nice pin and verification
 
 Use [the adoption manifest](.project/contracts/adoption.yaml), the [shared floor](https://github.com/rylee-bee-labs/play-nice-contracts/blob/main/contracts/everyone/FLOOR.md) and applicable packs before modifying this repo. [Freshness CI](.github/workflows/contract-freshness.yml) checks revision currentness, not test completeness or owner permission. A `playnice check .` badge may be claimed only after that separate check actually runs against a verified Play-Nice checkout. Existing repo safety, privacy, execution and publish gates remain binding.
-9. **Journeys run only against a fixture the harness started, and are look-only.** `uat_journey.cjs`
-   serves a built app on `127.0.0.1` with fictional seed data, proves it by nonce, and confines the
-   browser to that origin and to reads (CDP `Fetch`, every hop; self-tested each run). The newcomer
-   never presses anything that could answer, send, clear or withdraw. There is no flag that points a
-   journey at another URL; do not add one. Live Project Home, real data and sign-ins are out.

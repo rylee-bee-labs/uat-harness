@@ -94,12 +94,10 @@ would print a real port, a machine path, a private address or a bearer token is 
 (`screens/*.png`, `evidence.json`; stays on the machine). Exit `0` = the run completed (any verdict), `2` = could
 not start (NOT RUN, with `-> next:`), `1` = the harness itself failed. Findings never set the exit code.
 
-Phase 1 against the spec: one product (Project Home), one journey, one scripted newcomer, one oracle, Chromium only,
-look-only. Not yet: a model newcomer or judge, repeated trials, marks assist, personas as files, `UAT_FIXTURE_ORIGINS`
-(the harness only ever starts its own loopback fixture, so no outside target can be named), WebKit, `doctor`/`init`/
-`plan`/`explain`/`retest`, draft issues, adoption gates. The deck, settings and oracle live here under
-`journeys/project-home/` because the product repo was not touched; moving them to the product's `uat/` is a later,
-separate PR there.
+Phase 1: one product (Project Home), one journey, one scripted newcomer, one oracle, Chromium, look-only. Not yet: a
+model newcomer or judge, repeated trials, marks assist, personas as files, `UAT_FIXTURE_ORIGINS` (no outside target can
+be named), WebKit, `doctor`/`init`/`plan`/`explain`/`retest`, draft issues, adoption gates. The deck and oracle live
+under `journeys/project-home/` until they move to the product's `uat/` in a separate PR there.
 
 ## Environment variables
 
