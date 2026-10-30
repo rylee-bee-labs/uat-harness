@@ -3,6 +3,7 @@
 **Status:** Approved by the owner 2026-10-28 (design agreed in conversation 2026-10-28; revised after owner review on PR #42 — isolation
 boundary, outcome oracle, friction vs defect, coverage labels, privacy, and a smaller Phase 1).
 Build starts only once the Phase 1 plan (`docs/superpowers/plans/2026-10-28-journey-phase1.md`) is approved.
+**Phase 1 build, 2026-10-30:** started for Project Home on the owner's repo-walk answer ("Can we do project home/deverquest?", relayed by the coordinator), as the smallest slice: look-only, a scripted newcomer (no local vision model was available), the harness's own loopback fixture. See `docs/agent-reference.md` (Journey mode) for what it covers.
 Nothing here authorizes spend, merge-gate changes, deploys or weaker safeguards.
 
 **Supersedes the scope of:** [#41](https://github.com/rylee-bee-labs/uat-harness/issues/41) (newcomer UAT with a

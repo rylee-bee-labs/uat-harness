@@ -14,6 +14,9 @@ is the detail behind them.
 | `lib/redact.cjs` | In-driver artifact redaction (plain files + ZIP entries), fail closed | when changing redaction |
 | `lib/artifacts.cjs` | Hidden staging + redact-then-promote finalization | when changing artifact flow |
 | `uat.py` | Thin wrapper: runs the driver, withholds incomplete staging, re-scans as defence in depth, prints summary | yes |
+| `uat_journey.cjs` | Journey mode CLI: start fixture, guard self-test, scripted keyboard newcomer, phone glance, oracle, report, finalize | yes, for any journey change |
+| `lib/journey/*.cjs` | `fixture-server` (loopback app + canned API), `probes` (page measures, axe), `newcomer` (look-only press rules), `findings` (warm/cold, pure), `report` (pure + public-safety check), `source-refs` (file:line) | when changing one piece |
+| `journeys/<product>/` | A journey (`<id>.json`), its seed data (`fixture-data.cjs`) and curated hard words (`jargon.json`) | to add or change a journey |
 | `contract-map.json` | axe rule id → plain-words contract clause (override with `UAT_CONTRACT_MAP`) | when mapping rules |
 | `fixtures/sample.html` | The smoke-test page (undersized targets, POST button, form) | when changing the smoke test |
 | `contracts/{personas,journeys,acceptance}/` | Templates + one example each | docs work only |
@@ -35,6 +38,7 @@ tests then the browser fixtures; no test skips silently.
 | `npm run test:unit` | `package.json` | `node --test tests/unit` — browser-free policy/redaction tests |
 | `npm run test:browser` | `package.json` | `playwright test` — E01/E02/E03 fixtures (chromium) |
 | `npm test` | `package.json` | unit tests then browser fixtures |
+| `npm run journey -- JOURNEY.json --dist DIR [--src DIR] [--out DIR]` | `package.json` | journey mode, see below |
 | `npm run uat -- URL OUTDIR` | `package.json` | canonical safe driver; stages + redacts even without the wrapper |
 | `python3 uat.py URL [URL…] [--out DIR]` | `uat.py` | normal entry point; default out `./uat-out/<slug>-<ts>` |
 | `npm install && npx playwright install chromium` | README | only if not reusing an install via `UAT_NODE_MODULES` |
@@ -62,6 +66,40 @@ consistently in both commands.
 
 Expect exit 0, `findings.json` + `report.md`, undersized targets flagged (`"level": "problem"` in
 `findings.json`, `PROBLEM` in `report.md`), and read-only notes (`would have sent: POST …`).
+
+## Journey mode (Phase 1)
+
+Human-shaped testing: a newcomer with a goal walks a product the way a person would, and the report says in
+plain words whether it got there, what felt warm, and what felt cold. Spec:
+`docs/superpowers/specs/2026-10-28-human-shaped-uat-design.md`. Phase 1 is deliberately the smallest slice.
+
+```sh
+# build the product's web app first (its own repo), then:
+node uat_journey.cjs journeys/project-home/pain-day.json --dist PATH/TO/web/dist --src PATH/TO/web/src --out runs/ph
+```
+
+| Flag | Meaning |
+| --- | --- |
+| `--dist DIR` | The product's BUILT web app (needs `index.html`). Missing: **NOT RUN (no built app)**, exit 2. |
+| `--src DIR` | Optional: the product's `web/src`, to turn findings into `file:line` references and record the revision. |
+| `--out DIR` | Default `runs/<journey>-<timestamp>` (gitignored). |
+
+What a run does: starts the fixture server itself on `127.0.0.1` (a free port the OS picks), checks its one-time
+nonce, **self-tests the look-only guard** (a test write and a test off-origin request must both be stopped, or the
+run is NOT RUN), walks the journey at 1280x800 with the keyboard only (a scripted newcomer; no model), glances at a
+390x844 phone with touch emulation, then checks the outcome against the seed data (the oracle).
+
+Outputs under `--out`: `report.md` and `summary.json` (shareable, text only, public-safety checked: a report that
+would print a real port, a machine path, a private address or a bearer token is withheld), and `private/`
+(`screens/*.png`, `evidence.json`; stays on the machine). Exit `0` = the run completed (any verdict), `2` = could
+not start (NOT RUN, with `-> next:`), `1` = the harness itself failed. Findings never set the exit code.
+
+Phase 1 against the spec: one product (Project Home), one journey, one scripted newcomer, one oracle, Chromium only,
+look-only. Not yet: a model newcomer or judge, repeated trials, marks assist, personas as files, `UAT_FIXTURE_ORIGINS`
+(the harness only ever starts its own loopback fixture, so no outside target can be named), WebKit, `doctor`/`init`/
+`plan`/`explain`/`retest`, draft issues, adoption gates. The deck, settings and oracle live here under
+`journeys/project-home/` because the product repo was not touched; moving them to the product's `uat/` is a later,
+separate PR there.
 
 ## Environment variables
 

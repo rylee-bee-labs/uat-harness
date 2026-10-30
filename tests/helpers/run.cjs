@@ -68,4 +68,4 @@ function scanForToken(dir, token) {
   return hits;
 }
 
-module.exports = { REPO_ROOT, runDriver, runWrapper, scanForToken };
+module.exports = { REPO_ROOT, run, runDriver, runWrapper, scanForToken };
