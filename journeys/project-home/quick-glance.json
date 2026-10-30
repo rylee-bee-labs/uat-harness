@@ -1,0 +1,23 @@
+{
+  "id": "quick-glance",
+  "product": "Project Home",
+  "fixture_id": "project-home-mocked",
+  "title": "A quick glance: find the one thing that needs me, and who is waiting on whom",
+  "goal": "Open Home and find, in under a minute, the one thing that needs me and who is waiting on whom.",
+  "persona": {
+    "name": "keyboard-glance",
+    "story": "You know this app a little. You want the answer in as few steps as possible. You use the keyboard, you read little, and you stop when you have the answer.",
+    "desktop": { "width": 1280, "height": 800 },
+    "phone": { "width": 390, "height": 844 },
+    "reduced_motion": "reduce"
+  },
+  "budget": { "seconds": 60, "max_tabs_per_step": 40 },
+  "steps": [
+    { "id": "find-waiting", "say": "Find the way to what is waiting on me", "cues": ["waiting for you", "waiting on you", "needs you", "need you", "inbox"] },
+    { "id": "open-first-item", "say": "Open the first thing waiting on me", "region_cues": ["waiting on you"], "needs_disclosure": true }
+  ],
+  "oracle": { "what_needs_me": "{planted.question}", "who_is_waiting": ["{planted.asker}"] },
+  "jargon_file": "jargon.json",
+  "source_hints": { "Hall": "web/src/screens/Hall.tsx", "Inbox": "web/src/screens/Inbox.tsx",
+    "Decision card": "web/src/components/DecisionCard.tsx", "Shell": "web/src/App.tsx" }
+}

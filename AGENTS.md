@@ -23,6 +23,8 @@ Which file to open for which change. Full inventory, commands, env vars, outputs
   hidden-staging finalization, both fail closed.
 - `uat.py` — thin wrapper: withholds incomplete staging, re-scans as defence in depth.
 - `tests/` — browser-free unit tests; E01/E02/E03 Playwright fixtures (canary tokens only).
+- `uat_journey.cjs`, `lib/journey/`, `journeys/<product>/` — journey mode (Phase 1): a scripted newcomer
+  walks a LOCAL fixture, look-only, and writes a plain-language report. Any journey change.
 - `contracts/`, `contract-map.json` — templates and the axe-rule → contract-clause map. Docs only.
 - `uat-out/`, `runs/` — run output (gitignored). Never commit.
 
@@ -58,6 +60,11 @@ Which file to open for which change. Full inventory, commands, env vars, outputs
    `Fetch.requestPaused` session so the allowlist is re-checked at every hop, and an off-allowlist
    hop is failed rather than followed. Chromium-only; await the returned `attachPage(page)` before
    a page's first navigation.
+9. **Journeys run only against a fixture the harness started, and are look-only.** `uat_journey.cjs`
+   serves a built app on `127.0.0.1` with fictional seed data, proves it by nonce, and confines the
+   browser to that origin and to reads (CDP `Fetch`, every hop; self-tested each run). The newcomer
+   never presses anything that could answer, send, clear or withdraw. No flag points a journey at
+   another URL; do not add one.
 
 ## Done means
 
