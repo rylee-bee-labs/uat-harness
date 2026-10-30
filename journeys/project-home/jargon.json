@@ -1,0 +1,21 @@
+{
+  "about": "Words on Project Home's Hall and Inbox that a first-time reader may not know, with a plain-words guess. Curated by reading the screens, not exhaustive. A word only counts when it is actually on a screen the newcomer saw.",
+  "terms": {
+    "Estate": "the whole set of projects (Home calls it \"the Estate\")",
+    "DevErquest": "the game-like view of the agents' work",
+    "Hall": "the front page",
+    "Quest Journal": "the page that lists the agents' work",
+    "expedition": "one running mission of agent work",
+    "Calling": "a project or door that is asking for you",
+    "art pick": "a choice between pictures, waiting for you",
+    "Core online": "whether the Home service itself is up",
+    "Tools": "a folded group of other pages",
+    "Hotbar": "the row of nine shortcut buttons",
+    "Look later": "put this card off for now",
+    "Suggested": "the answer the agent recommends",
+    "Pending": "not answered yet",
+    "Table": "a page of art choices",
+    "Party": "the agents, shown as characters",
+    "Jot": "write a quick note"
+  }
+}

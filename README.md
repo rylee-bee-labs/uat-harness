@@ -93,3 +93,18 @@ payment flow, or anything you cannot afford to be clicked on for real.
 ## Play-Nice contract pin
 
 The [adoption manifest](.project/contracts/adoption.yaml) pins shared behavioral rules from [Play-Nice](https://github.com/rylee-bee-labs/play-nice-contracts). [Contract-freshness CI](.github/workflows/contract-freshness.yml) checks pin currency on PRs, default-branch pushes and weekly. A current pin does not prove real-browser acceptance, running services, deployed state, or authorization; `playnice check` and repo-specific tests are independent checks.
+
+## Journey mode (Phase 1, experimental)
+
+`uat.py` checks a page. A **journey** tries a goal the way a person would: a newcomer starts at the front door,
+uses the keyboard, and the report says in plain words whether it got there, what felt warm, what felt cold, and
+which words it did not know. It runs only against a local copy of a built app with fictional data that the
+harness starts itself, and it is look-only: nothing is answered, sent or cleared (every write is stopped in the
+browser, and each run proves the guard works before it starts).
+
+```sh
+npm install && npx playwright install chromium
+node uat_journey.cjs journeys/project-home/quick-glance.json --dist PATH/TO/web/dist --out runs/ph
+```
+
+Read `report.md` in the output folder. Details, flags and limits: [`docs/agent-reference.md`](docs/agent-reference.md#journey-mode-phase-1).
