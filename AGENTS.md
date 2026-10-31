@@ -26,6 +26,7 @@ Which file to open for which change. Full inventory, commands, env vars, outputs
 - `uat_journey.cjs`, `lib/journey/`, `journeys/<product>/` — journey mode (Phase 1): a scripted newcomer
   walks a LOCAL fixture, look-only, and writes a plain-language report. Any journey change.
 - `contracts/`, `contract-map.json` — templates and the axe-rule → contract-clause map. Docs only.
+- `tests/unit/library-seam.test.cjs` — pins the six exports a game's own UAT command borrows (fixture server and identity check, CDP and WebSocket guards, fixture decision, finalizer; see `docs/research/domain-driver-replay.md`). Changing one reaches other repos.
 - `uat-out/`, `runs/` — run output (gitignored). Never commit.
 
 ## Load-bearing rules

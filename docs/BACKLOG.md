@@ -13,7 +13,7 @@ first, whatever its size.
 
 - Issue: https://github.com/rylee-bee-labs/uat-harness/issues/5
 - Opened: 2026-10-06 · Labels: none
-- PARKED until the VEFR mission resumes (owner decision 2026-10-15). Issue to file by coordinator, label parked.
+- Status: PROCEEDING as the game-deck line only (owner decision 2026-10-30), tracked in [#47](https://github.com/rylee-bee-labs/uat-harness/issues/47). It was parked on 2026-10-15; the 2026-10-30 decision lifts that for game decks, where a game repo owns its rules, tape and player and borrows this repo's guarded browser. It does not lift the rule against a generic runtime API.
 
 This issue asks for research into whether uat-harness can act as evidence for a domain-owned player
 driver without taking on that domain's game semantics. It came out of a 2026-10-06 design session
@@ -28,4 +28,4 @@ artifacts, such as a VEFR session capsule, action tape, or checkpoint/divergence
 beside the existing UAT artifacts rather than replace them. The constraint is that this is research,
 not a build request, and nothing in it should widen the driver's responsibilities.
 
-Next step, when this is picked up: Reopen the issue and confirm VEFR still wants a documented player/action seam here before any design or code work.
+Next step: the seam is documented in `docs/research/domain-driver-replay.md` ("Game decks") and pinned by `tests/unit/library-seam.test.cjs`. Nothing more is built here until a second game repeats the same wiring; then extract one shared function, not a runtime API.

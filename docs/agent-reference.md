@@ -21,7 +21,7 @@ is the detail behind them.
 | `fixtures/sample.html` | The smoke-test page (undersized targets, POST button, form) | when changing the smoke test |
 | `contracts/{personas,journeys,acceptance}/` | Templates + one example each | docs work only |
 | `package.json` | Scripts `uat`, `check`, `test:unit`, `test:browser`, `test`; deps | rarely |
-| `tests/unit/*.test.cjs` | Browser-free unit tests for `lib/policy.cjs`, `lib/redact.cjs`, `lib/artifacts.cjs` | when changing those decisions |
+| `tests/unit/*.test.cjs` | Browser-free unit tests for `lib/policy.cjs`, `lib/redact.cjs`, `lib/artifacts.cjs`, and the game-deck library seam | when changing those decisions |
 | `tests/*.spec.cjs` | Playwright acceptance fixtures for E01/E02/E03 (canary tokens only) | when changing the guarantees |
 | `.github/workflows/ci.yml` | CI: unit tests + Playwright fixtures on chromium | when changing what CI proves |
 | `README.md` | Short human entry point: what this is, is it running, how to run it, where to read more | keep in sync with behaviour |
