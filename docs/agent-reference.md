@@ -1,8 +1,64 @@
 # Agent reference — uat-harness
 
 Reference detail split out of [`AGENTS.md`](../AGENTS.md) so that file can stay short enough for an
-agent session to read in full every time. The rules and the map live in `AGENTS.md`; everything here
-is the detail behind them.
+agent session to read in full every time. `AGENTS.md` carries the front page (test command, what not to
+touch, merge, how to ask); the load-bearing rules in full and the which-file-for-which-change map are below.
+
+## Which file to open for which change
+
+Full inventory is the next section.
+
+- `uat_driver.cjs` — all Playwright work: inventory, real mouse/touch/typing, axe, report; stages,
+  redacts and finalizes artifacts (fail closed). Any behaviour change.
+- `lib/policy.cjs`, `lib/netpolicy.cjs` — origin-allowlist decisions (pure); Playwright glue for
+  auth scoping, read-only block and WebSocket policy.
+- `lib/redact.cjs`, `lib/artifacts.cjs` — in-driver redaction (plain files + ZIP entries) and
+  hidden-staging finalization, both fail closed.
+- `uat.py` — thin wrapper: withholds incomplete staging, re-scans as defence in depth.
+- `tests/` — browser-free unit tests; E01/E02/E03 Playwright fixtures (canary tokens only).
+- `uat_journey.cjs`, `lib/journey/`, `journeys/<product>/` — journey mode (Phase 1): a scripted newcomer
+  walks a LOCAL fixture, look-only, and writes a plain-language report. Any journey change.
+- `contracts/`, `contract-map.json` — templates and the axe-rule → contract-clause map. Docs only.
+- `tests/unit/library-seam.test.cjs` — pins the six exports a game's own UAT command borrows (fixture server and identity check, CDP and WebSocket guards, fixture decision, finalizer; see `docs/research/domain-driver-replay.md`). Changing one reaches other repos.
+- `uat-out/`, `runs/` — run output (gitignored). Never commit.
+
+## Load-bearing rules
+
+1. **Read the driver's comments before touching click/navigation logic.** `uat_driver.cjs`
+   carries two hard-won comments (the mouse-coordinate lesson and the navigation/re-inventory
+   lesson) explaining the code's shape.
+2. **Keep `scrollIntoViewIfNeeded()` + a fresh `boundingBox()` before each click/tap; keep
+   `page.goto(url, {waitUntil:"domcontentloaded"})` as the return-to-page (never
+   `page.goBack()`); re-run the element inventory fresh every iteration.** Lose any and every
+   element after the first real navigation silently looks "dead" — the tool lying, not the site.
+3. **Keep redaction inside the driver, before promotion.** `lib/redact.cjs` scrubs a bearer token
+   from plain files and inside `trace-*.zip`; `lib/artifacts.cjs` redacts the hidden
+   `<out>/.staging/` tree and only then promotes it. Traces record request headers, so the token
+   is what CI would upload. A scrub failure must withhold everything (fail closed).
+   `redact_artifacts()` in `uat.py` stays defence in depth, not the primary guard.
+4. **Findings are never pass/fail.** Only an unreachable page (or unresolvable deps) exits
+   non-zero. Do not add a threshold that turns findings into an exit code.
+5. **Read-only stays the default** (`UAT_READONLY` unset/1 aborts every non-GET HTTP request,
+   blocks service workers, and drops WebSocket messages). This blocks methods/channels, not server
+   mutation; never point this at live mutating endpoints; `UAT_READONLY=0` only for targets you
+   may mutate.
+6. **`@playwright/test` and `axe-core` stay in `dependencies`, not `devDependencies`** —
+   consumers install this repo as a package (`npm install github:rylee-bee-labs/uat-harness`) and
+   npm skips a dependency's devDependencies.
+7. **Public-safe tracked files.** No secrets, tokens, hostnames, real ports, LAN IPs, deployment
+   topology or absolute machine paths. Examples use `http://127.0.0.1:PORT/...` literally; document
+   environment variables instead of paths. Never commit a run directory.
+8. **Authenticated requests are policed via CDP `Fetch`, not `context.route`.** Playwright's
+   route handler is NOT invoked for redirect hops (measured: a 302 to an off-origin host followed
+   with the Authorization header still attached). `lib/netpolicy.cjs` uses a raw CDP
+   `Fetch.requestPaused` session so the allowlist is re-checked at every hop, and an off-allowlist
+   hop is failed rather than followed. Chromium-only; await the returned `attachPage(page)` before
+   a page's first navigation.
+9. **Journeys run only against a fixture the harness started, and are look-only.** `uat_journey.cjs`
+   serves a built app on `127.0.0.1` with fictional seed data, proves it by nonce, and confines the
+   browser to that origin and to reads (CDP `Fetch`, every hop; self-tested each run). The newcomer
+   never presses anything that could answer, send, clear or withdraw. No flag points a journey at
+   another URL; do not add one.
 
 ## Full file map
 
@@ -189,3 +245,9 @@ is nothing left to find. Open a trace or a screenshot before calling a page done
 
 Pushing (the repo is public — a push publishes), changing visibility, adding telemetry or any
 network call beyond the target URL. General gates: the estate constitution.
+
+## Done means
+
+`npm run check && npm test` pass **and** the smoke test in "Commands" ran with the expected findings; for
+behaviour changes, open `report.md` (and a screenshot or trace) and quote what changed. Update `AGENTS.md`
+and `README.md` if env vars, outputs or commands changed.
