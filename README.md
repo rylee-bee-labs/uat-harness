@@ -83,7 +83,7 @@ payment flow, or anything you cannot afford to be clicked on for real.
 
 ## Where to read more
 
-- [`AGENTS.md`](AGENTS.md) — the load-bearing rules and which file to open for which change.
+- [`AGENTS.md`](AGENTS.md) — the front page for agents; [`docs/agent-reference.md`](docs/agent-reference.md) — the load-bearing rules in full and which file to open for which change.
 - [`docs/agent-reference.md`](docs/agent-reference.md) — the reference detail behind them:
   environment variables, what the driver writes, its tests and the full file inventory.
 - [`uat.py`](uat.py) — the entry point. Run it with no arguments for usage.
