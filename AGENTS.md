@@ -5,14 +5,14 @@ runs axe-core and writes findings a human reads: `python3 uat.py URL [--out DIR]
 **Public repo**: everything tracked must be safe to publish. This is the canonical UAT home (port behaviour here,
 never fork it). It does not own any repo's own Playwright suite, or CI wiring (`ci-harness`).
 
-## Verify (the same commands CI runs, Node 22)
+## Verify (run it: what CI runs)
 
 ```sh
 npm ci && npx playwright install --with-deps chromium
 npm run check && npm test
 ```
 
-`npm run check` is syntax only. `npm test` runs the browser-free unit tests, then the Playwright fixtures (E01 token
+CI uses Node 22. `npm run check` is syntax only. `npm test` runs the browser-free unit tests, then the Playwright fixtures (E01 token
 scoping, E02 read-only, E03 redaction). Before claiming a behaviour change works, run the smoke test and read
 `report.md` (recipe: `docs/agent-reference.md`, "Commands").
 
