@@ -1,5 +1,7 @@
 # uat-harness backlog
 
+> Status: Current (2026-11-02): it still tracks the game-deck line as PROCEEDING.
+
 This file is the tracking doc for work that was open in GitHub Issues here and was closed as not
 planned on 2026-10-07, so the issue queue could reach zero without losing the backlog.
 The issue bodies were not edited or rewritten when they were closed; everything under each heading

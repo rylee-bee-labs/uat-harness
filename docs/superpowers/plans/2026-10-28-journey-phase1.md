@@ -1,5 +1,7 @@
 # Journey Mode — Phase 1 (proof) Implementation Plan
 
+> Status: Unclear (2026-11-02): PR #46 landed the implementation, but the local-model trial, usability fix, and second run in the stated goal are not evidenced here; a completed Phase 4 record would decide.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A small local vision model, using only ordinary touch input, attempts three plain-language goals on an

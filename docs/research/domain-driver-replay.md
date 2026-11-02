@@ -1,5 +1,7 @@
 # Domain drivers and replayable UAT evidence
 
+> Status: Current (2026-11-02): it defines the game-deck library seam that PR #48 added, which docs/agent-reference.md and tests/unit/library-seam.test.cjs cite.
+
 Status: research for [#5](https://github.com/rylee-bee-labs/uat-harness/issues/5)  
 Date: 2026-10-06  
 Origin: Rylee and Sol worked this through together while designing VEFR's Player Driver / Pass-the-Controller work.

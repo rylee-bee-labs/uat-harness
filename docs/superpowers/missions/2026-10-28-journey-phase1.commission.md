@@ -7,6 +7,8 @@ accept: cd uat-harness && npm ci && npm run check && npm test && cd ../project-h
 ---
 # Commission: journey mode Phase 1 — a small model tries real goals on Project Home
 
+> Status: Current (2026-11-02): its deadline (2026-11-11) has not passed and its Phase 4 acceptance is not yet recorded.
+
 uat-harness is the estate's canonical UAT tool. Today it has one mode, **sweep** (`uat_driver.cjs`/`uat.py`):
 real clicks and taps over every element plus axe. This mission adds the first slice of a second mode,
 **journey**: a *player* model gets a plain-language *goal* from a *deck* in the product repo, sees only what its
@@ -14,8 +16,8 @@ real clicks and taps over every element plus axe. This mission adds the first sl
 and a *verifier* (a product-owned *oracle* first, a model *judge* as fallback) decides PASS / FAIL / UNKNOWN.
 It runs only against an authorized isolated *fixture* (a loopback Project Home build with canned synthetic API
 data) that the harness itself starts and identifies by a one-time nonce. The design is
-`uat-harness/docs/superpowers/specs/2026-10-28-human-shaped-uat-design.md`; the task-by-task plan is
-`uat-harness/docs/superpowers/plans/2026-10-28-journey-phase1.md`. Read both before dispatching anything.
+`docs/superpowers/specs/2026-10-28-human-shaped-uat-design.md`; the task-by-task plan is
+`docs/superpowers/plans/2026-10-28-journey-phase1.md`. Read both before dispatching anything.
 
 ## Why
 Prove, cheaply and honestly, that a small local model driving the product like a person finds usability problems
