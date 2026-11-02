@@ -1,5 +1,7 @@
 # Human-shaped UAT — design
 
+> Status: Current (2026-11-02): docs/agent-reference.md names this as the journey design, and PR #48 adds the current game-deck seam.
+
 **Status:** Approved by the owner 2026-10-28 (design agreed in conversation 2026-10-28; revised after owner review on PR #42 — isolation
 boundary, outcome oracle, friction vs defect, coverage labels, privacy, and a smaller Phase 1).
 Build starts only once the Phase 1 plan (`docs/superpowers/plans/2026-10-28-journey-phase1.md`) is approved.

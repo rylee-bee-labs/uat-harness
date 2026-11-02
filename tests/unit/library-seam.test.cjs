@@ -1,5 +1,5 @@
 // The library seam: the six exports a game repo's own UAT command borrows to replay a recorded game behind this repo's guard
-// (docs/research/domain-driver-replay.md, "Game decks"). This file pins their names and the options consumers pass.
+// (docs/archive/domain-driver-replay.md, "Game decks"). This file pins their names and the options consumers pass.
 // If a test here has to change, the change reaches other repos: say so in the PR, and update the consumers first.
 "use strict";
 const test = require("node:test");
