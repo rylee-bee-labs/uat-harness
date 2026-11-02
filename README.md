@@ -41,7 +41,7 @@ user-acceptance driver: point it at a page and it drives that page in a real bro
 changed, what broke, and what the accessibility scan says.
 
 New here? `npm test` is the one thing you can try right now, [AGENTS.md](AGENTS.md) is the how-to, and
-[docs/archive/BACKLOG.md](docs/archive/BACKLOG.md) records the historical issue queue. Questions go to
+[docs/BACKLOG.md](docs/BACKLOG.md) is what's still an idea (a plan, not a promise). Questions go to
 [issues](https://github.com/rylee-bee-labs/uat-harness/issues), and the how-to is a scroll down. 🐝
 
 ## What this is
