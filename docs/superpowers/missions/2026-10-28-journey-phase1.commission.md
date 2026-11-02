@@ -7,7 +7,7 @@ accept: cd uat-harness && npm ci && npm run check && npm test && cd ../project-h
 ---
 # Commission: journey mode Phase 1 — a small model tries real goals on Project Home
 
-> Status: Historical (2026-11-02): PR #46 landed the harness Phase 1 implementation; the commission records the one-time mission authority and acceptance.
+> Status: Current (2026-11-02): its deadline (2026-11-11) has not passed and its Phase 4 acceptance is not yet recorded.
 
 uat-harness is the estate's canonical UAT tool. Today it has one mode, **sweep** (`uat_driver.cjs`/`uat.py`):
 real clicks and taps over every element plus axe. This mission adds the first slice of a second mode,

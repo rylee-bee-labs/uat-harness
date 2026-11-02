@@ -1,6 +1,6 @@
 # Domain drivers and replayable UAT evidence
 
-> Status: Superseded by docs/superpowers/specs/2026-10-28-human-shaped-uat-design.md (2026-11-02): PR #48 adopted the game-deck integration seam, while the spec holds the broader current scope.
+> Status: Current (2026-11-02): it defines the game-deck library seam that PR #48 added, which docs/agent-reference.md and tests/unit/library-seam.test.cjs cite.
 
 Status: research for [#5](https://github.com/rylee-bee-labs/uat-harness/issues/5)  
 Date: 2026-10-06  

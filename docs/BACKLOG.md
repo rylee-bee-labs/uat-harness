@@ -1,6 +1,6 @@
 # uat-harness backlog
 
-> Status: Historical (2026-11-02): PR #48 records the later game-deck disposition; this is the closed 2026-10-07 issue queue.
+> Status: Current (2026-11-02): it still tracks the game-deck line as PROCEEDING.
 
 This file is the tracking doc for work that was open in GitHub Issues here and was closed as not
 planned on 2026-10-07, so the issue queue could reach zero without losing the backlog.
