@@ -6,8 +6,13 @@ const assert = require("node:assert/strict");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const AdmZip = require("adm-zip");
 const { redactArtifacts, scrubBuffer, REDACTED } = require("../../lib/redact.cjs");
+
+// adm-zip is a declared dependency, but the unit suite must also run where node_modules is not present
+// (this sandbox); only the ZIP cases need it, so they skip instead of failing the whole file.
+let AdmZip = null;
+try { AdmZip = require("adm-zip"); } catch (_) { AdmZip = null; }
+const zipTest = (name, fn) => test(name, { skip: AdmZip ? false : "adm-zip is not installed here" }, fn);
 
 const CANARY = "CANARY-redact-abc123";
 
@@ -22,7 +27,7 @@ test("scrubBuffer redacts the exact secret and any bearer-shaped value", () => {
   assert.ok(!/Bearer CANARY/.test(out));
 });
 
-test("redactArtifacts scrubs plain files and ZIP entries", () => {
+zipTest("redactArtifacts scrubs plain files and ZIP entries", () => {
   const dir = tmpDir("both");
   fs.writeFileSync(path.join(dir, "findings.json"), `{"note":"${CANARY}"}`);
   const zip = new AdmZip();
@@ -51,16 +56,26 @@ test("redactArtifacts is idempotent and reports a second pass as unchanged", () 
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test("redactArtifacts with no secret is a no-op", () => {
+test("with no secret, a bearer-shaped value is still scrubbed by pattern", () => {
   const dir = tmpDir("nosecret");
+  fs.writeFileSync(path.join(dir, "a.txt"), `token Authorization: Bearer ${CANARY}`);
+  const stats = redactArtifacts(dir, "");
+  assert.equal(stats.scanned, 1);
+  assert.equal(stats.changed, 1);
+  assert.ok(!fs.readFileSync(path.join(dir, "a.txt"), "utf8").includes(CANARY));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("with no secret, a value that is not bearer-shaped is left alone", () => {
+  const dir = tmpDir("nosecret-plain");
   fs.writeFileSync(path.join(dir, "a.txt"), CANARY);
   const stats = redactArtifacts(dir, "");
-  assert.deepEqual(stats, { scanned: 0, changed: 0 });
+  assert.deepEqual(stats, { scanned: 1, changed: 0 });
   assert.ok(fs.readFileSync(path.join(dir, "a.txt"), "utf8").includes(CANARY));
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test("redactArtifacts fails closed on an unreadable/corrupt ZIP", () => {
+zipTest("redactArtifacts fails closed on an unreadable/corrupt ZIP", () => {
   const dir = tmpDir("corrupt");
   fs.writeFileSync(path.join(dir, "trace-x.zip"), Buffer.from("PK\x03\x04 this is not a zip"));
   assert.throws(() => redactArtifacts(dir, CANARY), /cannot open zip trace-x\.zip/);

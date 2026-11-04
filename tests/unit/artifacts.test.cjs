@@ -61,6 +61,17 @@ test("finalizeArtifacts fails closed: a scrub error withholds everything", () =>
   fs.rmSync(out, { recursive: true, force: true });
 });
 
+test("finalizeArtifacts with no secret still scrubs a bearer token by pattern", () => {
+  const out = tmpDir("nosecret");
+  const stage = stageDirFor(out);
+  fs.mkdirSync(stage, { recursive: true });
+  fs.writeFileSync(path.join(stage, "report.md"), "Authorization: Bearer abcdefghijklmnop");
+  const stats = finalizeArtifacts(out, "", { stageDir: stage });
+  assert.equal(stats.changed, 1);
+  assert.ok(!fs.readFileSync(path.join(out, "report.md"), "utf8").includes("abcdefghijklmnop"));
+  fs.rmSync(out, { recursive: true, force: true });
+});
+
 test("finalizeArtifacts end to end with the real redactor", () => {
   const out = tmpDir("real");
   const stage = stageDirFor(out);

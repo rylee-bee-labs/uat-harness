@@ -35,32 +35,32 @@ test("J01: the newcomer gets there, the harness verifies by oracle, nothing is w
   try {
     expect(res.status, res.stderr).toBe(0);
     const summary = JSON.parse(fs.readFileSync(path.join(out, "summary.json"), "utf8"));
-    expect(summary.verdict).toBe("YES");
+    expect(summary.verdict).toBe("PASS");
     expect(summary.verified_by).toBe("oracle");
     expect(summary.look_only.reached_server).toBe(0);
     expect(summary.look_only.blocked).toBeGreaterThan(0);          // the page's own POST on load was stopped in the browser
     const report = fs.readFileSync(path.join(out, "report.md"), "utf8");
-    expect(report).toMatch(/Got there\? YES/);
+    expect(report).toMatch(/Got there\? PASS/);
     expect(report).toMatch(/chose not to press: "Approve now"/);   // the writing button was seen and refused
     expect(report).toMatch(/Guard self-test, before the walk: a test write/);
   } finally { demo.cleanup(); }
 });
 
-test("J01: found the thing but not who is waiting is PARTLY, and the cold spot says so", async () => {
+test("J01: found the thing but not who is waiting is FAIL, and the cold spot says so", async () => {
   const { demo, out, res } = await journey({ asker: false });
   try {
     expect(res.status, res.stderr).toBe(0);
     const summary = JSON.parse(fs.readFileSync(path.join(out, "summary.json"), "utf8"));
-    expect(summary.verdict).toBe("PARTLY");
+    expect(summary.verdict).toBe("FAIL");
     expect(summary.cold.map((c) => c.id)).toContain("who-not-shown");
   } finally { demo.cleanup(); }
 });
 
-test("J01: a newcomer who reached the wrong screen is NO (the oracle, not the newcomer, decides)", async () => {
+test("J01: a newcomer who reached the wrong screen is FAIL (the oracle, not the newcomer, decides)", async () => {
   const { demo, out, res } = await journey({ question: "Something else entirely?" });
   try {
     expect(res.status, res.stderr).toBe(0);
-    expect(JSON.parse(fs.readFileSync(path.join(out, "summary.json"), "utf8")).verdict).toBe("NO");
+    expect(JSON.parse(fs.readFileSync(path.join(out, "summary.json"), "utf8")).verdict).toBe("FAIL");
   } finally { demo.cleanup(); }
 });
 

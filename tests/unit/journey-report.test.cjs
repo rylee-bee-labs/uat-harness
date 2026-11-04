@@ -32,7 +32,7 @@ test("the report has every section a newcomer report needs, in order", () => {
 test("the top of the report answers: got there, top cold spots, who acts next", () => {
   const md = renderReport(run());
   const glance = md.split("## At a glance")[1].split("## Did I get there?")[0];
-  assert.match(glance, /Got there\? PARTLY/);
+  assert.match(glance, /Got there\? FAIL/);
   assert.match(glance, /Cold one/);
   assert.match(glance, /Who acts next:\*\* Agent\./);
 });
@@ -45,11 +45,40 @@ test("unobserved things are named UNKNOWN, never implied", () => {
   assert.match(md, /Findings are evidence, not pass\/fail\./);
 });
 
-test("verdict: both halves found is YES, one half is PARTLY, neither is NO", () => {
+test("verdict is one of PASS, FAIL or UNKNOWN, never a boolean", () => {
   const ok = (v) => ({ ok: v });
-  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(true) }), "YES");
-  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(false) }), "PARTLY");
-  assert.equal(verdictOf({ what_needs_me: ok(false), who_is_waiting: ok(true) }), "NO");
+  const oracle = verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(true) });
+  assert.equal(oracle, "PASS");
+  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(false) }), "FAIL");
+  assert.equal(verdictOf({ what_needs_me: ok(false), who_is_waiting: ok(false) }), "FAIL");
+  assert.deepEqual(["PASS", "FAIL", "UNKNOWN"].includes(oracle), true);
+});
+
+test("a case nobody could exercise is UNKNOWN, not PASS or FAIL", () => {
+  const ok = (v) => ({ ok: v });
+  const notReached = { exercised: false, what_needs_me: ok(false), who_is_waiting: ok(false) };
+  assert.equal(verdictOf(notReached), "UNKNOWN");
+  assert.equal(verdictOf(null), "UNKNOWN");
+});
+
+test("the report renders all three verdicts", () => {
+  const oracleFor = (a, b, exercised = true) => ({
+    exercised,
+    what_needs_me: { ok: a, expected: "q", found: a ? ["q"] : [] },
+    who_is_waiting: { ok: b, expected: ["a"], found: b ? ["a"] : [], missing: b ? [] : ["a"] },
+  });
+  const cases = [
+    [oracleFor(true, true), "PASS"],
+    [oracleFor(false, false), "FAIL"],
+    [oracleFor(false, false, false), "UNKNOWN"],
+  ];
+  for (const [oracle, verdict] of cases) {
+    const r = run();
+    r.evidence.oracle = oracle;
+    const md = renderReport(r);
+    assert.match(md, new RegExp(`Got there\\? ${verdict}`));
+    assert.match(md, new RegExp(`\\*\\*${verdict}\\.\\*\\*`));
+  }
 });
 
 test("the look-only section counts blocked writes and writes that reached the server", () => {
@@ -71,4 +100,26 @@ test("findUnsafe catches real ports, machine paths, private addresses, private h
   assert.ok(findUnsafe("nas.example.lan").length);
   assert.ok(findUnsafe("Authorization: Bearer abcdefghijklmnop").length);
   assert.deepEqual(findUnsafe("http://127.0.0.1:PORT/ is fine as a placeholder and web/src/App.tsx:5 is a repo path"), []);
+});
+
+test("findUnsafe catches the address ranges it used to miss", () => {
+  // RFC1918 172.16.0.0/12 (the whole 172.16-172.31 block).
+  assert.ok(findUnsafe("host 172.16.0.1").length);
+  assert.ok(findUnsafe("host 172.31.255.254").length);
+  assert.ok(findUnsafe("host 0.0.0.0").length);
+  // Neighbouring ranges: loopback, link-local, IPv6 loopback and ULA (fc00::/7).
+  assert.ok(findUnsafe("host 127.0.0.53").length);
+  assert.ok(findUnsafe("host 127.0.0.1").length);
+  assert.ok(findUnsafe("host 169.254.10.5").length);
+  assert.ok(findUnsafe("http://[::1]:8080/").length);
+  assert.ok(findUnsafe("address fc00::1").length);
+  assert.ok(findUnsafe("address fd12:3456:789a::1").length);
+  // Just outside the private block stays safe.
+  assert.deepEqual(findUnsafe("172.15.0.1 and 172.32.0.1 are public"), []);
+});
+
+test("the shareable report names no screenshot path", () => {
+  const md = renderReport(run());
+  assert.doesNotMatch(md, /\.(png|jpe?g|webp|gif)\b/i);
+  assert.doesNotMatch(md, /private\/screens/);
 });
