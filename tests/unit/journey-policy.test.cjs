@@ -24,9 +24,18 @@ test("fixture policy: anything off the fixture origin is refused, including anot
   assert.match(decideFixtureRequest({ url: "https://example.test/", method: "GET", fixtureOrigin: O }).reason, /off-origin/);
 });
 
-test("fixture policy: inline data and blob resources carry no network request", () => {
+test("fixture policy: inline data and blob subresources carry no network request", () => {
   assert.equal(decideFixtureRequest({ url: "data:image/png;base64,AA", method: "GET", fixtureOrigin: O }).action, "continue");
   assert.equal(decideFixtureRequest({ url: "blob:http://127.0.0.1:8790/abc", method: "GET", fixtureOrigin: O }).action, "continue");
+});
+
+test("fixture policy: a top-level data: or blob: document is refused (an inline scheme is not the fixture)", () => {
+  for (const url of ["data:text/html,<script>alert(1)</script>", `blob:${O}/abc`]) {
+    const d = decideFixtureRequest({ url, method: "GET", fixtureOrigin: O, isNavigation: true });
+    assert.equal(d.action, "abort", `${url} must not become the top-level document`);
+    assert.match(d.reason, /inline/);
+    assert.match(d.reason, /top-level/);
+  }
 });
 
 test("fixture policy: an unparseable url is refused", () => {
