@@ -210,6 +210,8 @@ async function main() {
       const whoExpected = journey.oracle.who_is_waiting.map((x) => expand(x, planted));
       const whoFound = whoExpected.filter((w) => nameForms(w).some((f) => textNow.includes(f.toLowerCase())));
       ev.oracle = {
+        // If the newcomer never reached the Inbox, the oracle has no evidence to judge: UNKNOWN.
+        exercised: s1.found,
         what_needs_me: { expected: expand(journey.oracle.what_needs_me, planted), ok: inbox.bodyText.includes(expand(journey.oracle.what_needs_me, planted)) },
         who_is_waiting: { expected: whoExpected, found: whoFound, missing: whoExpected.filter((w) => !whoFound.includes(w)), ok: whoFound.length === whoExpected.length },
       };
