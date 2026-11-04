@@ -29,12 +29,13 @@ const { buildFindings, findWords } = require("./lib/journey/findings.cjs");
 const { renderReport, verdictOf } = require("./lib/journey/report.cjs");
 const { finalizeJourney } = require("./lib/journey/finalize.cjs");
 const { locateInSource } = require("./lib/journey/source-refs.cjs");
+const modelPlayer = require("./lib/journey/model-player.cjs");
 
 function parseArgs(argv) {
   const a = { _: [] };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
-    if (k === "--dist" || k === "--src" || k === "--out" || k === "--build-label") a[k.slice(2)] = argv[++i];
+    if (k === "--dist" || k === "--src" || k === "--out" || k === "--build-label" || k === "--player" || k === "--trials") a[k.slice(2)] = argv[++i];
     else a._.push(k);
   }
   return a;
@@ -79,6 +80,11 @@ async function main() {
   if (!dist) throw new NotRun("NOT RUN (no built app): pass --dist <built-app-dir>. -> next: build the product's web app, then re-run");
   if (!fs.existsSync(path.join(dist, "index.html"))) throw new NotRun("NOT RUN (no built app): index.html not found in --dist. -> next: build the product's web app");
 
+  const wantsModel = args.player === "model";
+  if (args.player && !wantsModel) throw new NotRun(`NOT RUN (unknown player): "${args.player}". -> next: use --player model, or leave it out for the scripted newcomer`);
+  const modelUrl = process.env.UAT_MODEL_URL || "";
+  if (wantsModel && !modelUrl) throw new NotRun("NOT RUN (no model): set UAT_MODEL_URL to a model on this machine. -> next: start the local vision model");
+  if (wantsModel && !modelPlayer.isLoopback(modelUrl)) throw new NotRun("NOT RUN (tier not allowed): screenshots may only go to a model on this machine, and UAT_MODEL_URL is not loopback. A cloud model is an owner decision. -> next: use a local model");
   const journey = JSON.parse(fs.readFileSync(journeyPath, "utf8"));
   const jdir = path.dirname(path.resolve(journeyPath));
   const fixtureData = require(path.join(jdir, "fixture-data.cjs"));
@@ -245,6 +251,40 @@ async function main() {
       await ctx.close();
     }
 
+    // 3b. The model newcomer, on fresh contexts. Same fixture, same guard, same oracle; it never sees the oracle.
+    if (wantsModel) {
+      const modelName = process.env.UAT_MODEL_NAME || "local";
+      let vision;
+      try { vision = await modelPlayer.visionCheck({ url: modelUrl, model: modelName, browser }); }
+      catch (e) { throw new NotRun(`NOT RUN (no model): the model at UAT_MODEL_URL did not answer (${e.name}). -> next: start the local vision model`); }
+      ev.model = { name: modelName, assisted: "numbered marks", vision, trials: [] };
+      if (vision.ok) {
+        const trials = Math.max(1, Number(args.trials) || 3);
+        for (let t = 1; t <= trials; t++) {
+          const { ctx, page } = await newContext(D, false);
+          await page.goto(`${server.origin}/`, { waitUntil: "domcontentloaded" });
+          await settle(page, stepCues);
+          const who = journey.oracle.who_is_waiting.map((x) => expand(x, planted));
+          const judge = (text) => {
+            const lower = text.toLowerCase();
+            return {
+              exercised: true,
+              what_needs_me: { ok: text.includes(expand(journey.oracle.what_needs_me, planted)) },
+              who_is_waiting: { ok: who.every((w) => nameForms(w).some((f) => lower.includes(f.toLowerCase()))) },
+            };
+          };
+          const trial = await modelPlayer.runTrial({
+            page, goal: journey.goal, url: modelUrl, model: modelName, seed: t * 1000,
+            reached: async (p) => verdictOf(judge(await p.evaluate(() => document.body.innerText))) === "PASS",
+            save: async (n, image) => fs.writeFileSync(path.join(stage, "private", "screens", `model-t${t}-s${n}.png`), image),
+          });
+          const verdict = trial.reachedAt !== null ? "PASS" : "FAIL";
+          ev.model.trials.push({ ...trial, verdict, disagreement: trial.stop === "said-done" && verdict !== "PASS" });
+          await ctx.close();
+        }
+      }
+    }
+
     // 4. Gather and write.
     const consolesFiltered = consoleErrors.filter((m) => !/404 \(Not Found\)/.test(m));
     ev.console = { errors: consolesFiltered, pageErrors };
@@ -285,6 +325,7 @@ async function main() {
     const summary = {
       run_id: `${journey.id}-${startedAt}`, journey: journey.id, fixture_id: journey.fixture_id, started_at: startedAt,
       verdict: verdictOf(ev.oracle), verified_by: "oracle", newcomer: "scripted", wall_ms: ev.wall_ms,
+      ...(ev.model ? { model_newcomer: { assisted: ev.model.assisted, vision_ok: ev.model.vision.ok, trials: ev.model.trials.map((t) => ({ verdict: t.verdict, stop: t.stop, steps: t.steps.length, ms: t.ms, refused: t.refused.length, disagreement: t.disagreement, reached_at: t.reachedAt, noticed: t.noticed })) } } : {}),
       keys: ev.desktop.keys, cold: findings.cold.map((c) => ({ id: c.id, severity: c.severity, title: c.title })),
       warm: findings.warm.map((w) => ({ id: w.id, title: w.title })),
       look_only: { blocked: blocked.length, reached_server: ev.lookOnly.reachedServer.length },
