@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { renderReport, findUnsafe, verdictOf } = require("../../lib/journey/report.cjs");
+const { renderReport, findUnsafe, verdictOf, isPartial, withheldReasons } = require("../../lib/journey/report.cjs");
 
 function run(over = {}) {
   return {
@@ -32,7 +32,7 @@ test("the report has every section a newcomer report needs, in order", () => {
 test("the top of the report answers: got there, top cold spots, who acts next", () => {
   const md = renderReport(run());
   const glance = md.split("## At a glance")[1].split("## Did I get there?")[0];
-  assert.match(glance, /Got there\? PARTLY/);
+  assert.match(glance, /Got there\? FAIL\.\*\* I found the one thing\. I could not find who/);
   assert.match(glance, /Cold one/);
   assert.match(glance, /Who acts next:\*\* Agent\./);
 });
@@ -45,11 +45,29 @@ test("unobserved things are named UNKNOWN, never implied", () => {
   assert.match(md, /Findings are evidence, not pass\/fail\./);
 });
 
-test("verdict: both halves found is YES, one half is PARTLY, neither is NO", () => {
+test("verdict: both halves is PASS, one half is FAIL and partial, neither is FAIL, no oracle is UNKNOWN", () => {
   const ok = (v) => ({ ok: v });
-  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(true) }), "YES");
-  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(false) }), "PARTLY");
-  assert.equal(verdictOf({ what_needs_me: ok(false), who_is_waiting: ok(true) }), "NO");
+  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(true) }), "PASS");
+  assert.equal(verdictOf({ what_needs_me: ok(true), who_is_waiting: ok(false) }), "FAIL");
+  assert.equal(isPartial({ what_needs_me: ok(true), who_is_waiting: ok(false) }), true);
+  assert.equal(verdictOf({ what_needs_me: ok(false), who_is_waiting: ok(true) }), "FAIL");
+  assert.equal(isPartial({ what_needs_me: ok(false), who_is_waiting: ok(true) }), false);
+  assert.equal(verdictOf(null), "UNKNOWN");
+  assert.equal(verdictOf({}), "UNKNOWN");
+});
+
+test("findUnsafe catches every private range and any-address forms, and not their neighbours", () => {
+  for (const bad of ["172.16.0.1", "172.31.255.9", "172.20.1.1", "http://0.0.0.0:8080/", "http://[::1]:8080/"]) {
+    assert.ok(findUnsafe(`at ${bad}`).length, bad);
+  }
+  for (const fine of ["172.15.0.1", "172.32.0.1", "8.8.8.8"]) assert.deepEqual(findUnsafe(`at ${fine}`), [], fine);
+});
+
+test("a summary is checked as well as the report", () => {
+  const report = "nothing private here";
+  assert.deepEqual(withheldReasons({ report, summary: { journey: "x" } }), []);
+  assert.ok(withheldReasons({ report, summary: { cold: [{ title: "seen at 192.168.1.20" }] } }).length);
+  assert.ok(withheldReasons({ report: "host 192.168.1.20", summary: {} }).length);
 });
 
 test("the look-only section counts blocked writes and writes that reached the server", () => {

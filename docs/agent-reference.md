@@ -147,7 +147,7 @@ run is NOT RUN), walks the journey at 1280x800 with the keyboard only (a scripte
 
 Outputs under `--out`: `report.md` and `summary.json` (shareable, text only, public-safety checked: a report that
 would print a real port, a machine path, a private address or a bearer token is withheld), and `private/`
-(`screens/*.png`, `evidence.json`; stays on the machine). Exit `0` = the run completed (any verdict), `2` = could
+(`screens/*.png`, `evidence.json`; stays on the machine). Verdicts are PASS, FAIL or UNKNOWN; finding half the outcome is a FAIL with `partial: true`. Exit `0` = the run completed (any verdict), `2` = could
 not start (NOT RUN, with `-> next:`), `1` = the harness itself failed. Findings never set the exit code.
 
 Phase 1: one product (Project Home), one journey, one scripted newcomer, one oracle, Chromium, look-only. Not yet: a

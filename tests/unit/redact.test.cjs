@@ -51,6 +51,15 @@ test("redactArtifacts is idempotent and reports a second pass as unchanged", () 
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test("redactArtifacts with no secret still removes a bearer token when asked to always scrub", () => {
+  const dir = tmpDir("always");
+  fs.writeFileSync(path.join(dir, "a.txt"), "Authorization: Bearer abcdefghijklmnop");
+  const stats = redactArtifacts(dir, "", { always: true });
+  assert.equal(stats.changed, 1);
+  assert.ok(!fs.readFileSync(path.join(dir, "a.txt"), "utf8").includes("abcdefghijklmnop"));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test("redactArtifacts with no secret is a no-op", () => {
   const dir = tmpDir("nosecret");
   fs.writeFileSync(path.join(dir, "a.txt"), CANARY);

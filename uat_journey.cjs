@@ -20,13 +20,13 @@ const path = require("path");
 const { execFileSync } = require("child_process");
 
 const { decideFixtureRequest } = require("./lib/policy.cjs");
-const { installCdpRequestPolicy, installWebSocketPolicy } = require("./lib/netpolicy.cjs");
+const { installJourneyGuard } = require("./lib/netpolicy.cjs");
 const { finalizeArtifacts, stageDirFor } = require("./lib/artifacts.cjs");
 const { startFixtureServer, verifyIdentity } = require("./lib/journey/fixture-server.cjs");
 const probes = require("./lib/journey/probes.cjs");
 const { runStep } = require("./lib/journey/newcomer.cjs");
 const { buildFindings, findWords } = require("./lib/journey/findings.cjs");
-const { renderReport, findUnsafe, verdictOf } = require("./lib/journey/report.cjs");
+const { renderReport, withheldReasons, verdictOf, isPartial } = require("./lib/journey/report.cjs");
 const { locateInSource } = require("./lib/journey/source-refs.cjs");
 
 function parseArgs(argv) {
@@ -121,11 +121,11 @@ async function main() {
         viewport, deviceScaleFactor: 1, serviceWorkers: "block", reducedMotion: journey.persona.reduced_motion === "reduce" ? "reduce" : "no-preference",
         isMobile: !!touch, hasTouch: !!touch,
       });
-      const policy = await installCdpRequestPolicy(ctx, {
+      const policy = await installJourneyGuard(ctx, {
+        fixtureOrigin: server.origin,
         onBlock: (b) => blocked.push(b),
         decide: ({ url, method }) => decideFixtureRequest({ url, method, fixtureOrigin: server.origin, allowWrites: false }),
       });
-      await installWebSocketPolicy(ctx, { readOnly: true, onBlock: (b) => blocked.push(b) });
       const page = await ctx.newPage();
       await policy.attachPage(page);
       page.on("console", (m) => { if (m.type() === "error") consoleErrors.push(m.text().slice(0, 160)); });
@@ -278,19 +278,19 @@ async function main() {
 
     const run = { journey, evidence: ev, findings, words, refs, shots };
     const report = renderReport(run);
-    const unsafe = findUnsafe(report);
-    if (unsafe.length) throw new Error(`the report would publish ${unsafe.join(" and ")}; withheld (fail closed)`);
-    fs.writeFileSync(path.join(stage, "report.md"), report);
     const summary = {
       run_id: `${journey.id}-${startedAt}`, journey: journey.id, fixture_id: journey.fixture_id, started_at: startedAt,
-      verdict: verdictOf(ev.oracle), verified_by: "oracle", newcomer: "scripted", wall_ms: ev.wall_ms,
+      verdict: verdictOf(ev.oracle), partial: isPartial(ev.oracle), verified_by: "oracle", newcomer: "scripted", wall_ms: ev.wall_ms,
       keys: ev.desktop.keys, cold: findings.cold.map((c) => ({ id: c.id, severity: c.severity, title: c.title })),
       warm: findings.warm.map((w) => ({ id: w.id, title: w.title })),
       look_only: { blocked: blocked.length, reached_server: ev.lookOnly.reachedServer.length },
     };
+    const unsafe = withheldReasons({ report, summary });
+    if (unsafe.length) throw new Error(`the report would publish ${unsafe.join(" and ")}; withheld (fail closed)`);
+    fs.writeFileSync(path.join(stage, "report.md"), report);
     fs.writeFileSync(path.join(stage, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
     fs.writeFileSync(path.join(stage, "private", "evidence.json"), JSON.stringify(ev, null, 2) + "\n");
-    finalizeArtifacts(outDir, "", { stageDir: stage });
+    finalizeArtifacts(outDir, "", { stageDir: stage, alwaysScrub: true });
     console.log(`Journey "${journey.id}": ${summary.verdict} in ${(ev.wall_ms / 1000).toFixed(1)} s. ${findings.cold.length} cold spots, ${findings.warm.length} warm moments.`);
     console.log(`Report: ${path.relative(process.cwd(), path.join(outDir, "report.md"))}`);
     console.log(`Look-only: ${blocked.length} blocked in the browser, ${ev.lookOnly.reachedServer.length} writes reached the server.`);

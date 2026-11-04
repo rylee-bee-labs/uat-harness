@@ -7,12 +7,13 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-function html({ question, asker }) {
+function html({ question, asker, consoleLine = "" }) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Demo Home</title></head><body>
 <nav aria-label="Primary"><a href="/">Home</a> <a href="/inbox">Inbox, 1 waiting</a></nav>
 <main id="m"></main>
 <script>
 fetch("/api/track", { method: "POST", body: "{}" }).catch(function () {});
+${consoleLine ? `console.error(${JSON.stringify(consoleLine)});` : ""}
 var m = document.getElementById("m");
 if (location.pathname === "/inbox") {
   m.innerHTML = '<h1>Inbox</h1><section aria-label="Waiting on you"><h2>Waiting on you \\u00b7 1</h2>' +
@@ -28,11 +29,11 @@ if (location.pathname === "/inbox") {
 </script></body></html>`;
 }
 
-function makeDemo({ asker = true, question = "Approve the demo plan?", build = true } = {}) {
+function makeDemo({ asker = true, question = "Approve the demo plan?", build = true, consoleLine = "" } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "uat-demo-"));
   const dist = path.join(root, "dist");
   fs.mkdirSync(dist);
-  if (build) fs.writeFileSync(path.join(dist, "index.html"), html({ question, asker }));
+  if (build) fs.writeFileSync(path.join(dist, "index.html"), html({ question, asker, consoleLine }));
   const jdir = path.join(root, "journey");
   fs.mkdirSync(jdir);
   fs.writeFileSync(path.join(jdir, "fixture-data.cjs"), `module.exports = {

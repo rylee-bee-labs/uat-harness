@@ -66,3 +66,11 @@ test("fixture server: refuses to start without a built app, and path traversal i
     assert.ok(r.status === 403 || /Demo/.test(await r.text()), "never serves a file outside the app");
   } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
 });
+
+// A GET can only change a fixture's state through a function route. None ships, so mutations() misses nothing today.
+test("the shipped Project Home fixture has only plain-data routes", () => {
+  const { buildFixture } = require("../../journeys/project-home/fixture-data.cjs");
+  const fx = buildFixture();
+  const fns = Object.entries(fx.routes).filter(([, v]) => typeof v === "function").map(([k]) => k);
+  assert.deepEqual(fns, []);
+});

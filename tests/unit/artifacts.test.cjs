@@ -71,3 +71,15 @@ test("finalizeArtifacts end to end with the real redactor", () => {
   assert.ok(!fs.readFileSync(path.join(out, "report.md"), "utf8").includes(CANARY));
   fs.rmSync(out, { recursive: true, force: true });
 });
+
+test("finalizing with no secret still scrubs a bearer token when alwaysScrub is set, and not otherwise", () => {
+  for (const [alwaysScrub, kept] of [[true, false], [false, true]]) {
+    const out = fs.mkdtempSync(path.join(os.tmpdir(), "uat-always-"));
+    const stage = stageDirFor(out);
+    fs.mkdirSync(stage, { recursive: true });
+    fs.writeFileSync(path.join(stage, "e.json"), "Authorization: Bearer abcdefghijklmnop");
+    finalizeArtifacts(out, "", { stageDir: stage, alwaysScrub });
+    assert.equal(fs.readFileSync(path.join(out, "e.json"), "utf8").includes("abcdefghijklmnop"), kept);
+    fs.rmSync(out, { recursive: true, force: true });
+  }
+});
