@@ -20,7 +20,7 @@ const path = require("path");
 const { execFileSync } = require("child_process");
 
 const { decideFixtureRequest } = require("./lib/policy.cjs");
-const { installCdpRequestPolicy, installWebSocketPolicy } = require("./lib/netpolicy.cjs");
+const { installJourneyGuard } = require("./lib/netpolicy.cjs");
 const { stageDirFor } = require("./lib/artifacts.cjs");
 const { startFixtureServer, verifyIdentity } = require("./lib/journey/fixture-server.cjs");
 const probes = require("./lib/journey/probes.cjs");
@@ -122,11 +122,11 @@ async function main() {
         viewport, deviceScaleFactor: 1, serviceWorkers: "block", reducedMotion: journey.persona.reduced_motion === "reduce" ? "reduce" : "no-preference",
         isMobile: !!touch, hasTouch: !!touch,
       });
-      const policy = await installCdpRequestPolicy(ctx, {
+      const policy = await installJourneyGuard(ctx, {
+        fixtureOrigin: server.origin,
         onBlock: (b) => blocked.push(b),
         decide: ({ url, method }) => decideFixtureRequest({ url, method, fixtureOrigin: server.origin, allowWrites: false }),
       });
-      await installWebSocketPolicy(ctx, { readOnly: true, onBlock: (b) => blocked.push(b) });
       const page = await ctx.newPage();
       await policy.attachPage(page);
       page.on("console", (m) => { if (m.type() === "error") consoleErrors.push(m.text().slice(0, 160)); });
