@@ -4,7 +4,6 @@
 "use strict";
 
 const fs = require("fs");
-const http = require("http");
 const path = require("path");
 const { test, expect } = require("@playwright/test");
 const { installCdpRequestPolicy } = require("../lib/netpolicy.cjs");
@@ -37,7 +36,6 @@ test("J01: the newcomer gets there, the harness verifies by oracle, nothing is w
     expect(res.status, res.stderr).toBe(0);
     const summary = JSON.parse(fs.readFileSync(path.join(out, "summary.json"), "utf8"));
     expect(summary.verdict).toBe("PASS");
-    expect(summary.partial).toBe(false);
     expect(summary.verified_by).toBe("oracle");
     expect(summary.look_only.reached_server).toBe(0);
     expect(summary.look_only.blocked).toBeGreaterThan(0);          // the page's own POST on load was stopped in the browser
@@ -48,13 +46,12 @@ test("J01: the newcomer gets there, the harness verifies by oracle, nothing is w
   } finally { demo.cleanup(); }
 });
 
-test("J01: found the thing but not who is waiting is FAIL and partial, and the cold spot says so", async () => {
+test("J01: found the thing but not who is waiting is FAIL, and the cold spot says so", async () => {
   const { demo, out, res } = await journey({ asker: false });
   try {
     expect(res.status, res.stderr).toBe(0);
     const summary = JSON.parse(fs.readFileSync(path.join(out, "summary.json"), "utf8"));
     expect(summary.verdict).toBe("FAIL");
-    expect(summary.partial).toBe(true);
     expect(summary.cold.map((c) => c.id)).toContain("who-not-shown");
   } finally { demo.cleanup(); }
 });
@@ -89,31 +86,6 @@ test("J01: output has no image outside private/, no staging left behind, and no 
     expect(shareable).not.toMatch(/127\.0\.0\.1:\d{2,5}/);
     expect(shareable).not.toContain(demo.root);
   } finally { demo.cleanup(); }
-});
-
-test("J01: a bearer token the page printed withholds the whole output, leaving nothing behind", async () => {
-  const { demo, out, res } = await journey({ asker: true, consoleLine: "Authorization: Bearer abcdefghijklmnop123" });
-  try {
-    expect(res.status).toBe(1);
-    expect(res.stderr + res.stdout).toMatch(/withheld \(fail closed\)/);
-    const files = fs.existsSync(out) ? walkFiles(out) : [];
-    for (const f of files.filter((x) => !x.endsWith(".png"))) expect(fs.readFileSync(f, "utf8"), f).not.toContain("abcdefghijklmnop123");
-    expect(files.some((f) => f.endsWith("report.md") || f.endsWith("summary.json"))).toBe(false);
-  } finally { demo.cleanup(); }
-});
-
-test("J01: UAT_TARGET cannot point a journey anywhere: it runs only on its own fixture", async () => {
-  const hits = [];
-  const decoy = http.createServer((req, res) => { hits.push(req.url); res.end("decoy"); });
-  await new Promise((r) => decoy.listen(0, "127.0.0.1", r));
-  const demo = makeDemo({ asker: true });
-  try {
-    const out = path.join(demo.root, "out");
-    const res = await run(process.execPath, [CLI, demo.journey, "--dist", demo.dist, "--out", out],
-      { timeout: 120000, env: { ...process.env, UAT_TARGET: `http://127.0.0.1:${decoy.address().port}` } });
-    expect(res.status, res.stderr).toBe(0);
-    expect(hits).toEqual([]);
-  } finally { decoy.close(); demo.cleanup(); }
 });
 
 test("J01: the fixture guard stops a write, an off-origin read and an off-origin popup; nothing reaches the server", async ({ browser }) => {

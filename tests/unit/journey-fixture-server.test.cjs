@@ -45,6 +45,23 @@ test("fixture server: a write that reaches it is refused (405) and recorded as a
   } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
 });
 
+test("fixture server: a GET the fixture declares state-changing is recorded by the mutations() backstop", async () => {
+  const d = dist();
+  const s = await startFixtureServer({
+    distDir: d,
+    routes: { "/api/approve": { mutates: true, body: { ok: true } }, "/api/home": { n: 1 } },
+    fixtureId: "demo",
+  });
+  try {
+    // A GET that changes state: the method alone cannot show it, the fixture declares it.
+    const approve = await fetch(`${s.origin}/api/approve?choice=yes`);
+    // An ordinary read on the same server is not a mutation.
+    await fetch(`${s.origin}/api/home`);
+    assert.deepEqual(s.mutations().map((m) => `${m.method} ${m.path}`), ["GET /api/approve"]);
+    assert.deepEqual(await approve.json(), { ok: true });
+  } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
+});
+
 test("fixture server: says who it is, and verifyIdentity rejects a wrong id or nonce", async () => {
   const d = dist();
   const s = await startFixtureServer({ distDir: d, routes: {}, fixtureId: "demo", nonce: "n-1" });
@@ -65,12 +82,4 @@ test("fixture server: refuses to start without a built app, and path traversal i
     const r = await fetch(`${s.origin}/..%2f..%2fetc%2fpasswd`);
     assert.ok(r.status === 403 || /Demo/.test(await r.text()), "never serves a file outside the app");
   } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
-});
-
-// A GET can only change a fixture's state through a function route. None ships, so mutations() misses nothing today.
-test("the shipped Project Home fixture has only plain-data routes", () => {
-  const { buildFixture } = require("../../journeys/project-home/fixture-data.cjs");
-  const fx = buildFixture();
-  const fns = Object.entries(fx.routes).filter(([, v]) => typeof v === "function").map(([k]) => k);
-  assert.deepEqual(fns, []);
 });
