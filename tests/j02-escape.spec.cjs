@@ -74,6 +74,33 @@ const VECTORS = {
   "srcdoc iframe": () => { const f = document.createElement("iframe"); f.srcdoc = `<script>fetch("${DECOY}/srcdoc").catch(()=>{})<\/script>`; document.body.append(f); },
 };
 
+// An inline document carries its own script, so "no decoy hit" alone does not prove the document was refused:
+// its fetch can be blocked while the data:/blob: document itself still becomes the page. These checks run after
+// the wait for the two inline-scheme vectors and assert the document never stayed as a page.
+function expectNoLiveInlinePage(ctx) {
+  for (const p of ctx.pages()) {
+    expect(p.url(), "a live page left on an inline document").not.toMatch(/^(blob|data):/i);
+  }
+}
+
+const AFTER_WAIT = {
+  "data: navigation": ({ page, ctx, app }) => {
+    // Chrome refuses a top-frame data: navigation started by page script, so the tab must still be on the fixture.
+    expect(page.url().startsWith(app.origin), `top-level page after a data: navigation: ${page.url()}`).toBe(true);
+    expectNoLiveInlinePage(ctx);
+  },
+  "blob: popup": ({ ctx, blocked }) => {
+    // A popup that committed a blob document must be gone, not sitting there with a blocked fetch.
+    expectNoLiveInlinePage(ctx);
+    // The guard reports either the inline refusal (CDP sees the document request) or the page-close backstop
+    // (the blob document commits before CDP attaches). One of them must be present.
+    expect(
+      blocked.some((b) => /inline scheme/i.test(b.reason) || b.kind === "page"),
+      "the guard reported the blob document"
+    ).toBe(true);
+  },
+};
+
 for (const [name, vector] of Object.entries(VECTORS)) {
   test(`J02: ${name} does not reach off the fixture`, async ({ browser }) => {
     const decoy = await decoyServer();
@@ -93,6 +120,8 @@ for (const [name, vector] of Object.entries(VECTORS)) {
       await new Promise((r) => setTimeout(r, 1500));
       expect(decoy.hits, "requests that reached the decoy").toEqual([]);
       expect(app.writes, "writes that reached the fixture").toEqual([]);
+      const afterWait = AFTER_WAIT[name];
+      if (afterWait) afterWait({ page, ctx, blocked, app });
     } finally {
       await ctx.close();
       app.server.close();
