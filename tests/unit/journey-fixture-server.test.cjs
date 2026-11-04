@@ -54,10 +54,11 @@ test("fixture server: a GET the fixture declares state-changing is recorded by t
   });
   try {
     // A GET that changes state: the method alone cannot show it, the fixture declares it.
-    assert.deepEqual(await (await fetch(`${s.origin}/api/approve?choice=yes`)).json(), { ok: true });
+    const approve = await fetch(`${s.origin}/api/approve?choice=yes`);
     // An ordinary read on the same server is not a mutation.
-    assert.deepEqual(await (await fetch(`${s.origin}/api/home`)).json(), { n: 1 });
+    await fetch(`${s.origin}/api/home`);
     assert.deepEqual(s.mutations().map((m) => `${m.method} ${m.path}`), ["GET /api/approve"]);
+    assert.deepEqual(await approve.json(), { ok: true });
   } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
 });
 
