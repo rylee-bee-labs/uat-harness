@@ -125,7 +125,7 @@ async function main() {
       const policy = await installJourneyGuard(ctx, {
         fixtureOrigin: server.origin,
         onBlock: (b) => blocked.push(b),
-        decide: ({ url, method }) => decideFixtureRequest({ url, method, fixtureOrigin: server.origin, allowWrites: false }),
+        decide: ({ url, method, isNavigation }) => decideFixtureRequest({ url, method, isNavigation, fixtureOrigin: server.origin, allowWrites: false }),
       });
       const page = await ctx.newPage();
       await policy.attachPage(page);
