@@ -45,6 +45,22 @@ test("fixture server: a write that reaches it is refused (405) and recorded as a
   } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
 });
 
+test("fixture server: a GET the fixture declares state-changing is recorded by the mutations() backstop", async () => {
+  const d = dist();
+  const s = await startFixtureServer({
+    distDir: d,
+    routes: { "/api/approve": { mutates: true, body: { ok: true } }, "/api/home": { n: 1 } },
+    fixtureId: "demo",
+  });
+  try {
+    // A GET that changes state: the method alone cannot show it, the fixture declares it.
+    assert.deepEqual(await (await fetch(`${s.origin}/api/approve?choice=yes`)).json(), { ok: true });
+    // An ordinary read on the same server is not a mutation.
+    assert.deepEqual(await (await fetch(`${s.origin}/api/home`)).json(), { n: 1 });
+    assert.deepEqual(s.mutations().map((m) => `${m.method} ${m.path}`), ["GET /api/approve"]);
+  } finally { await s.stop(); fs.rmSync(d, { recursive: true, force: true }); }
+});
+
 test("fixture server: says who it is, and verifyIdentity rejects a wrong id or nonce", async () => {
   const d = dist();
   const s = await startFixtureServer({ distDir: d, routes: {}, fixtureId: "demo", nonce: "n-1" });
