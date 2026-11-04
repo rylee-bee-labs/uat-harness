@@ -111,7 +111,7 @@ for (const [name, vector] of Object.entries(VECTORS)) {
       const policy = await installJourneyGuard(ctx, {
         fixtureOrigin: app.origin,
         onBlock: (b) => blocked.push(b),
-        decide: ({ url, method }) => decideFixtureRequest({ url, method, fixtureOrigin: app.origin, allowWrites: false }),
+        decide: ({ url, method, isNavigation }) => decideFixtureRequest({ url, method, isNavigation, fixtureOrigin: app.origin, allowWrites: false }),
       });
       const page = await ctx.newPage();
       await policy.attachPage(page);
@@ -130,6 +130,13 @@ for (const [name, vector] of Object.entries(VECTORS)) {
   });
 }
 
+// uat_journey.cjs must hand the rule the navigation flag, or the rule refusing inline top-level documents cannot fire.
+test("J02: a journey's guard passes isNavigation to the fixture rule", () => {
+  const fs = require("fs");
+  const src = fs.readFileSync(require("path").resolve(__dirname, "..", "uat_journey.cjs"), "utf8");
+  expect(src).toMatch(/decide: \(\{ url, method, isNavigation \}\) => decideFixtureRequest\(\{ url, method, isNavigation,/);
+});
+
 // The guard must not break the app it guards: ordinary same-origin behaviour still works.
 test("J02: a same-origin popup and a same-origin redirect still work, and a page sent away is closed", async ({ browser }) => {
   const decoy = await decoyServer();
@@ -143,7 +150,7 @@ test("J02: a same-origin popup and a same-origin redirect still work, and a page
   try {
     const policy = await installJourneyGuard(ctx, {
       fixtureOrigin: app.origin, onBlock: (b) => blocked.push(b),
-      decide: ({ url, method }) => decideFixtureRequest({ url, method, fixtureOrigin: app.origin, allowWrites: false }),
+      decide: ({ url, method, isNavigation }) => decideFixtureRequest({ url, method, isNavigation, fixtureOrigin: app.origin, allowWrites: false }),
     });
     const page = await ctx.newPage();
     await policy.attachPage(page);
