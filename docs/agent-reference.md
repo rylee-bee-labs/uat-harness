@@ -109,10 +109,10 @@ then use **two terminals from this repo root** so the fixture server remains liv
 
 ```sh
 # Terminal A (leave running)
-python3 -m http.server 8765 --bind 127.0.0.1 --directory fixtures
+python3 -m http.server PORT --bind 127.0.0.1 --directory fixtures
 
 # Terminal B
-python3 uat.py http://127.0.0.1:8765/sample.html --out runs/smoke
+python3 uat.py http://127.0.0.1:PORT/sample.html --out runs/smoke
 ```
 
 If dependencies are intentionally supplied from another checkout, set

@@ -70,10 +70,11 @@ website is down. Passing tests do not replace the real-browser smoke below.
 npm install && npx playwright install chromium
 
 # Terminal A: serve the included synthetic smoke fixture (leave running).
-python3 -m http.server 8765 --bind 127.0.0.1 --directory fixtures
+# Pick any free local port and use it as PORT below.
+python3 -m http.server PORT --bind 127.0.0.1 --directory fixtures
 
 # Terminal B: drive that same local fixture in a separate shell.
-python3 uat.py http://127.0.0.1:8765/sample.html --out runs/smoke
+python3 uat.py http://127.0.0.1:PORT/sample.html --out runs/smoke
 ```
 
 That last command clicks, taps and types for real. Read-only mode is on by default: it blocks
@@ -83,9 +84,8 @@ payment flow, or anything you cannot afford to be clicked on for real.
 
 ## Where to read more
 
-- [`AGENTS.md`](AGENTS.md) — the front page for agents; [`docs/agent-reference.md`](docs/agent-reference.md) — the load-bearing rules in full and which file to open for which change.
-- [`docs/agent-reference.md`](docs/agent-reference.md) — the reference detail behind them:
-  environment variables, what the driver writes, its tests and the full file inventory.
+- [`AGENTS.md`](AGENTS.md) — the front page for agents.
+- [`docs/agent-reference.md`](docs/agent-reference.md) — the load-bearing rules in full, environment variables, what the driver writes, its tests and the full file inventory.
 - [`uat.py`](uat.py) — the entry point. Run it with no arguments for usage.
 - [`contract-map.json`](contract-map.json) — axe-core rule ids mapped to plain-words contract
   clauses.
