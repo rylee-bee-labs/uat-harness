@@ -117,7 +117,7 @@ python3 uat.py http://127.0.0.1:PORT/sample.html --out runs/smoke
 
 If dependencies are intentionally supplied from another checkout, set
 `UAT_NODE_MODULES` to its *real existing absolute path*, not a literal
-angle-bracket placeholder. Port 8765 is an example; use an available local port
+angle-bracket placeholder. Replace PORT with an available local port
 consistently in both commands.
 
 Expect exit 0, `findings.json` + `report.md`, undersized targets flagged (`"level": "problem"` in
