@@ -22,7 +22,8 @@ source:
   # 2026-11-03: auto re-pin, fast-forward from e0b8f50 (1 commit(s); 0 file(s) under contracts/ changed)
   # 2026-11-04: auto re-pin, fast-forward from 11ec5e6 (1 commit(s); 4 file(s) under contracts/ changed)
   # 2026-11-21: auto re-pin, fast-forward from c7b19a4 (1 commit(s); 0 file(s) under contracts/ changed)
-  revision: a133fa3797c2c6431e460355276846ccc957a037
+  # 2026-11-25: auto re-pin, fast-forward from a133fa3 (1 commit(s); 0 file(s) under contracts/ changed)
+  revision: 8a45186a9a87681b2751ad34b8c9ced4978ca855
 freshness:
   policy: require-current
   ref: main
